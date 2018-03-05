@@ -1,38 +1,28 @@
-# Name of your program:
-NAME=assign1
+# Compiler
+CC := g++
 
-# List of all .cpp source code files included in your program (separated by spaces):
-SRC=procon.cpp
+# Paths
+SRCDIR := src
+BUILDDIR := build
+INCDIR := include
+TARGET := bin/run
 
+SRC := main.cpp product.cpp producer.cpp
 
+OBJ := $(SRC:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
 
-SRCPATH=./
-OBJ=$(addprefix $(SRCPATH), $(SRC:.cpp=.o))
+CFLAGS := -g
 
-RM=rm -f
-INCPATH=includes
-CPPFLAGS+= -I $(INCPATH)
+$(TARGET): $(OBJ)
+	@echo " Linking..."
+	@echo " $(CC) %^ -o $(TARGET)"; $(CC) $^ -o $(TARGET) $(LIB)
 
-
-all: $(OBJ)
-	g++ $(OBJ) -o $(NAME) -lpthread
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(BUILDDIR)
+	@echo " $(CC) $(CFLAGS) -I $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) -I $(INC) -c -o $@ $<
 
 clean:
-	-$(RM) *~
-	-$(RM) *#*
-	-$(RM) *swp
-	-$(RM) *.core
-	-$(RM) *.stackdump
-	-$(RM) $(SRCPATH)*.o
-	-$(RM) $(SRCPATH)*.obj
-	-$(RM) $(SRCPATH)*~
-	-$(RM) $(SRCPATH)*#*
-	-$(RM) $(SRCPATH)*swp
-	-$(RM) $(SRCPATH)*.core
-	-$(RM) $(SRCPATH)*.stackdump
+	@echo " Cleaning...";
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
-fclean: clean
-	-$(RM) $(NAME)
-
-re: fclean all
-
+.PHONY: clean
