@@ -9,7 +9,7 @@ TARGET := bin/run
 
 SRC := main.cpp product.cpp producer.cpp
 
-OBJ := $(SRC:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
+OBJ := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRC:.cpp=.o))
 
 CFLAGS := -g
 
