@@ -6,14 +6,11 @@
  * I pledge my honor that I have abided by the Stevens Honor System.
  *******************************************************************/
 
-//#include "procon.h"
-//#include "pthread.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <chrono>
 #include <sstream.h>
 
-using namespace std;
+#include "producer.h"
 
 class Producer {
         string id;
@@ -46,20 +43,6 @@ class Buffer {
         }
 }
 
-class Product {
-        string id;
-        time_t tstamp;
-        unsigned int life;
-        //product uids im thinking can be in the form of x(y+) where x is an alphabetical id for the producer and y are sequential numerical ids for its products
-        Product(string uid){
-            id = uid;
-            life = std::rand()%1024;
-            // the current time and day from the system clock wrapped in a time_t 
-            tstamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-            
-        }
-        
-};
 //struct for storing the statistics, one instantiated for each algorithm later 
     struct stats {
         int total_time;
