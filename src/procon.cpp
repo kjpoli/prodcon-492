@@ -94,5 +94,33 @@ int main(int argc, char** argv) {
     
     std::srand(params.seed);
     
+    pthread_t producer_thread[params.prod_threads];
+    pthread_t consumer_thread[params.con_threads];
+    
+    Producer producers[params.prod_threads];
+    Consumer consumers[params.con_threads];
+
+    Buffer buffer(params.queue_size);
+
+    for (int i = 0; i < params.prod_threads; ++i) {
+        producers[i] = new Producer(i, params.total_prods);
+        pthread_create(&producer_thread[i], NULL, producers[i].run, &buffer);
+    }
+    
+    for (int i = 0; i < params.con_threads; ++i) {
+        consumers[i] = new Consumer(i, params.total_prods);
+        pthread_create(&consumer_thread[i], NULL, consumers[i].run, &buffer);
+    }
+
+    for (int i = 0; i < param.prod_threads; ++i) {
+        pthread_join(producer_thread[i], NULL);
+    }
+
+    for (int i = 0; i < param.con_threads; ++1) {
+        pthread_join(consumer_thread[i], NULL);
+    }
+
+    delete buffer;
+
     return 0;
 }
