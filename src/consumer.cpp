@@ -1,6 +1,17 @@
-pthread_cond_t *notEmpty;
-pthread_mutex_t *consume_mutex;
-pthread_mutex_t *queue_mutex;
+#include "consumer.h"
+#include "buffer.h"
+
+pthread_mutex_t *consume_mutex = NULL;
+int products_consumed = 0;
+
+Consumer() {
+    this->id = -1;
+}
+
+Consumer(unsigned int id) {
+    this->id = id;
+}
+
 
 int fn(int n) {
     if (n < 0) {
@@ -12,41 +23,49 @@ int fn(int n) {
     }
 }
 
-void *consume(void *id_void_ptr) {
-    int *buffer = *(buffer *)id_void_ptr;
+void *consume(void *arg) {
+    Buffer *buffer = *(buffer *)arg;
 
-    while (true) {
-        pthread_mutex_lock(mutex);
+    while (products_consumed < buffer->getMaxProducts()) {
+        pthread_mutex_lock(consumer_mutex);
         
-        while (buffer->empty) {
-            pthread_cond_wait(notEmpty, mutex);
+        while (buffer->isEmpty()) {
+            pthread_cond_wait(notEmpty, consumer_mutex);
         }
 
+        pthread_mutex_lock(buffer_mutex);
         Product *p = buffer.remove();
 
-        if (scheduler && p.getLife() >= quantum) {
-            p.setLife(p.getLife() - quantum);
+        if (scheduler && (p.getLife() >= quantum)) {
+            p.succLife(quantum);
             
             for (int i = 0; i < quantum; ++i) {
                 fn(10);
             }
             
-            buffer.push(p);
+            buffer.add(p);
+            pthread_mutex_unlock(buffer_mutex);
         } else {
+            pthread_mutex_unlock(buffer_mutex);
+            
             for (int i = 0; i < p.getLife(); ++i) {
                 fn(10);
             }
             
-            std::cout << "Consumer id " << this->id << " consumed Product " << p->id << std::endl;
+            std::printf("Consumer id %d consumed Product %d", this->getId(), p->getId());
             delete *p;
             ++products_consumed;
         }
         
         usleep(10000);
         
-        pthread_cond_signal(notFull, mutex);
-        pthread_mutex_unlock(mutex);
+        pthread_cond_signal(notFull);
+        pthread_mutex_unlock(consume_mutex);
     }
 
     pthread_exit(NULL);
+}
+
+unsigned int getId() {
+    return this->id;
 }

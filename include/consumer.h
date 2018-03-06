@@ -5,9 +5,12 @@ class Consumer {
     public:
         Consumer();
         Consumer(int id);
-        consumer();
+        void *consume(void *args);
+        unsigned int getId();
+        pthread_mutex_t consumeMutex();
     private:
-        unsigned int;
-}
+        unsigned int id;
+        pthread_mutex_t lock;
+};
 
 #endif  // INCLUDE_CONSUMER_H_
