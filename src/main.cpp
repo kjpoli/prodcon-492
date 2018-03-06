@@ -8,40 +8,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sstream.h>
+#include <sstream>
 
+#include "product.h"
+#include "buffer.h"
 #include "producer.h"
-
-class Producer {
-        string id;
-        int total_prods;
-        int prods_over_life;
-
-        void produce() {
-            if(prods_over_life != total_prods){
-                Product P = new Product(id + to_string(prods_over_life));
-            }
-        }
-        
-}
-
-class Buffer {
-        pthread_cond_t full;
-        pthread_cond_t hasItem;
-        unsigned int size;
-        deque<Product> queue;
-
-        Buffer(int qsize){
-            size = qsize;
-        }
-        
-        void add(){
-            
-        }
-        void remove() {
-            
-        }
-}
+#include "consumer.h"
 
 //struct for storing the statistics, one instantiated for each algorithm later 
     struct stats {

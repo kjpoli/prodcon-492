@@ -1,27 +1,33 @@
-#include <stdlib.h>
-
 #include "product.h"
 
-Product() {
-    this->id = -1;
+#include <stdlib.h>
+
+Product::Product() {
+    this->id = 0;
     this->time_stamp = clock();
     this->life = std::rand() % 1024;
 }
 
-Product(int id) {
+Product::Product(unsigned int id) {
     this->id = id;
     this->time_stamp = clock();
     this->life = std::rand() % 1024;
 }
 
-int getProductId() {
+unsigned int Product::getProductId() {
     return this->id;
 }
 
-time_t getProductTime() {
+time_t Product::getProductTime() {
     return this->time_stamp;
 }
 
-unsigned int getProductLife() {
+unsigned int Product::getProductLife() {
     return this->life;
+}
+
+void Product::setProductLife(unsigned int q) {
+    if (this->life >= q) {
+        this->life = this->life - q;
+    }
 }

@@ -1,33 +1,44 @@
 #include "producer.h"
+#include "buffer.h"
+
 #include <stdlib.h>
+
+pthread_mutex_t *produce_mutex = NULL;
+
+unsigned int products_produced = 0;
 
 Producer() {
     this->id = -1;
-    this-> total_prods = 0;
-    this-> prods_over_life = 0;
-    this-> lock = pthread_mutex_init();
+    this->products_over_life = 0;
 }
 
-Producer(int id, int max) {
+Producer(unsigned int id) {
     this->id = id;
-    this->total_prods = max;
-    this->prods_over_life = 0;
+    this->products_over_life = 0;
 }
 
-void *produce(Buffer b){
-    if(this->prods_over_life == this->total_prods){
-        //destroy this producer
-        return;
-    }
-    while(true){
-        pthread_mutex_lock(&(this->lock));
-        pthread_cond_wait(&(b->hasSpace),&(this->lock));
+void *produce(void *arg) {
+    Buffer *buffer = *(buffer *)arg;
+
+    while(products_produced < buffer->getMaxProducts()){
+        pthread_mutex_lock(producer_mutex);
+        
+        while (buffer->isEmpty()) {
+            pthread_cond_wait(notFull, producer_mutex);
+        }
+
+        pthread_mutex_lock(buffer_mutex);
         Product p = new Product((this->prods_over_life));
         b.add(p);
         this->prods_over_life = ++(this->prods_over_life);
-        pthread_mutex_unlock(&(this->lock));
+        pthread_mutex_unlock(buffer_mutex);
+
+        pthread_cond_signal(notEmpty);
+        pthread_mutex_unlock(producer_mutex);
     }
-    return; 
+
+    this->setProductsOverLife(products_over_life);
+    pthread_exit(NULL);
 }
 
 unsigned int getId() {
@@ -40,8 +51,4 @@ unsigned int getTotalProducts() {
 
 unsigned int getProductsOverLife() {
     return this->prods_over_life;
-}
-
-pthread_mutex_t getLock(){
-    return this->lock;
 }
