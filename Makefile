@@ -7,7 +7,8 @@ BUILDDIR := build
 INCDIR := include
 TARGET := bin/run
 
-SRC := main.cpp product.cpp producer.cpp
+# Retrieve all files in SRCDIR with cpp extensions
+SRC := $(shell find $(SRCDIR) -type f -name *.cpp)
 
 OBJ := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRC:.cpp=.o))
 
@@ -15,11 +16,11 @@ CFLAGS := -g
 
 $(TARGET): $(OBJ)
 	@echo " Linking..."
-	@echo " $(CC) %^ -o $(TARGET)"; $(CC) $^ -o $(TARGET) $(LIB)
+	@echo " $(CC) $^ -o $(TARGET)"; $(CC) $^ -o $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(BUILDDIR)
-	@echo " $(CC) $(CFLAGS) -I $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) -I $(INC) -c -o $@ $<
+	@echo " $(CC) $(CFLAGS) -I $(INCDIR) -c -o $@ $< -lpthread"; $(CC) $(CFLAGS) -I $(INCDIR) -c -o $@ $< -lpthread
 
 clean:
 	@echo " Cleaning...";
