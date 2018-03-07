@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     int args[7]; 
     
     for (int i = 0; i < 7; ++i) {
-        istringstream iss(argv[i]);
+        std::istringstream iss(argv[i]);
 
         if (!(iss >> args[i])) {
             printf("Invalid value for argument P%d\n", i + 1);
@@ -74,25 +74,31 @@ int main(int argc, char** argv) {
 
     Buffer buffer(params.queue_size);
 
+    pthread_mutex_t *buffer_mutex;
+    pthread_cond_t *notEmpty;
+    pthread_cond_t *notFull;
+
+    pthread_mutex_init(buffer_mutex, NULL);
+    pthread_cond_init(notEmpty, NULL);
+    pthread_cond_init(notFull, NULL);
+
     for (int i = 0; i < params.prod_threads; ++i) {
-        producers[i] = new Producer(i, params.total_prods);
-        pthread_create(&producer_thread[i], NULL, producers[i].run, &buffer);
+        producers[i] = Producer(i);
+        pthread_create(&producer_thread[i], NULL, &(producers[i].produce), &buffer);
     }
     
     for (int i = 0; i < params.con_threads; ++i) {
-        consumers[i] = new Consumer(i, params.total_prods);
-        pthread_create(&consumer_thread[i], NULL, consumers[i].run, &buffer);
+        consumers[i] = Consumer(i);
+        pthread_create(&consumer_thread[i], NULL, &(consumers[i].consume), &buffer);
     }
 
-    for (int i = 0; i < param.prod_threads; ++i) {
+    for (int i = 0; i < params.prod_threads; ++i) {
         pthread_join(producer_thread[i], NULL);
     }
 
-    for (int i = 0; i < param.con_threads; ++1) {
+    for (int i = 0; i < params.con_threads; ++i) {
         pthread_join(consumer_thread[i], NULL);
     }
-
-    delete buffer;
 
     return 0;
 }

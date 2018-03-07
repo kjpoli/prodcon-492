@@ -3,6 +3,9 @@
 
 #include "product.h"
 
+#include <pthread.h>
+#include <deque>
+
 extern pthread_cond_t *notFull;
 extern pthread_cond_t *notEmpty;
 extern pthread_mutex_t *buffer_mutex;
@@ -12,12 +15,13 @@ class Buffer {
         Buffer(int max_size);
         void add(Product p);
         Product remove();
-        unsigned int isEmpty();
-        unsigned int getSize();
-        unsigned int getMaxProducts();
+        int isEmpty();
+        int getSize();
+        int getMaxProducts();
+        int isFull();
     private:
-        std::deque<Product *> queue;
-        unsigned int max_size;
+        std::deque<Product> *queue;
+        int max_size;
         unsigned int max_products;
 };
 

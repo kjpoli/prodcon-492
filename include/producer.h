@@ -6,13 +6,13 @@ extern pthread_mutex_t *producer_mutex;
 class Producer {
     public:
         Producer();
-        Producer(unsigned int id);
-        void *produce(void *args);
-        unsigned int getId();
+        Producer(int id);
+        static void *produce(void *args);
+        int getId();
         unsigned int getProductsOverLife();
         unsigned int getTotalProducts();
     private:
-        unsigned int id;
+        int id;
         unsigned int total_prods;
         unsigned int prods_over_life;
 };
