@@ -1,15 +1,20 @@
 #include "consumer.h"
 #include "buffer.h"
 
-pthread_mutex_t *consume_mutex = NULL;
+#include <stdio.h>
+#include <unistd.h>
+
+pthread_mutex_t *consumer_mutex = NULL;
 int products_consumed = 0;
 
-Consumer() {
+Consumer::Consumer() {
     this->id = -1;
 }
 
-Consumer(unsigned int id) {
+Consumer::Consumer(int id, int scheduler, int quantum) {
     this->id = id;
+    this->scheduler = scheduler;
+    this->quantum = quantum;
 }
 
 
@@ -23,8 +28,12 @@ int fn(int n) {
     }
 }
 
-void *consume(void *arg) {
-    Buffer *buffer = *(buffer *)arg;
+void Consumer::run(Buffer buffer) {
+    pthread_create(thread, NULL, &consume, &buffer);
+}
+
+void* Consumer::consume(void *arg) {
+    Buffer *buffer = (Buffer *) arg;
 
     while (products_consumed < buffer->getMaxProducts()) {
         pthread_mutex_lock(consumer_mutex);
@@ -34,26 +43,25 @@ void *consume(void *arg) {
         }
 
         pthread_mutex_lock(buffer_mutex);
-        Product *p = buffer.remove();
+        Product p = buffer->remove();
 
-        if (scheduler && (p.getLife() >= quantum)) {
-            p.succLife(quantum);
+        if (getScheduler() && (p.getProductLife() >= getQuantum())) {
+            p.setProductLife(getQuantum());
             
-            for (int i = 0; i < quantum; ++i) {
+            for (int i = 0; i < getQuantum(); ++i) {
                 fn(10);
             }
             
-            buffer.add(p);
+            buffer->add(p);
             pthread_mutex_unlock(buffer_mutex);
         } else {
             pthread_mutex_unlock(buffer_mutex);
             
-            for (int i = 0; i < p.getLife(); ++i) {
+            for (int i = 0; i < p.getProductLife(); ++i) {
                 fn(10);
             }
             
-            std::printf("Consumer id %d consumed Product %d", this->getId(), p->getId());
-            delete *p;
+            printf("Consumer id %d consumed Product %d", getId(), p.getProductId());
             ++products_consumed;
         }
         
@@ -66,6 +74,14 @@ void *consume(void *arg) {
     pthread_exit(NULL);
 }
 
-unsigned int getId() {
-    return this->id;
+int Consumer::getScheduler() {
+    return scheduler;
+}
+
+int Consumer::getId() {
+    return id;
+}
+
+int Consumer::getQuantum() {
+    return quantum;
 }
